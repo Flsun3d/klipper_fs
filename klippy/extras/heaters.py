@@ -169,7 +169,7 @@ class ControlBangBang:
 # Proportional Integral Derivative (PID) control algo
 ######################################################################
 
-PID_SETTLE_DELTA = 1.
+PID_SETTLE_DELTA = 3. #flsun modify ,change it from 1 to 3
 PID_SETTLE_SLOPE = .1
 
 class ControlPID:
@@ -214,8 +214,8 @@ class ControlPID:
             self.prev_temp_integ = temp_integ
     def check_busy(self, eventtime, smoothed_temp, target_temp):
         temp_diff = target_temp - smoothed_temp
-        return (abs(temp_diff) > PID_SETTLE_DELTA
-                or abs(self.prev_temp_deriv) > PID_SETTLE_SLOPE)
+        return (abs(temp_diff) > PID_SETTLE_DELTA) #flsun modify ,add a ) and delete next line ,so heat will finish when temp is around target +-1 
+                #or abs(self.prev_temp_deriv) > PID_SETTLE_SLOPE)
 
 
 ######################################################################
