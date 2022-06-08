@@ -89,6 +89,24 @@ class DeltaKinematics:
         self.axes_min = toolhead.Coord(-max_xy, -max_xy, self.min_z, 0.)
         self.axes_max = toolhead.Coord(max_xy, max_xy, self.max_z, 0.)
         self.set_position([0., 0., 0.], ())
+
+        self.printer = config.get_printer()#flsun add
+        gcode = self.printer.lookup_object('gcode')#flsun add
+        gcode.register_command('M665', self.cmd_M665)#flsun add
+    def cmd_M665(self, gcmd): #flsun add,M665 to modify arm length
+        # Use A,B,C
+        configfile = self.printer.lookup_object('configfile')#test
+        params = gcmd.get_command_parameters()
+        if 'A' in params:
+            self.arm_lengths[0] += float(params['A'])
+        if 'B' in params:
+            self.arm_lengths[1] += float(params['B'])
+        if 'C' in params:
+            self.arm_lengths[2] += float(params['C'])
+        configfile.set('stepper_a', 'arm_length', "%.6f" % (self.arm_lengths[0]))
+        configfile.set('stepper_b', 'arm_length', "%.6f" % (self.arm_lengths[1]))
+        configfile.set('stepper_c', 'arm_length', "%.6f" % (self.arm_lengths[2]))
+
     def get_steppers(self):
         return [s for rail in self.rails for s in rail.get_steppers()]
     def _actuator_to_cartesian(self, spos):
@@ -213,23 +231,24 @@ class DeltaCalibration:
                                       self.abs_endstops, steppos)]
     def save_state(self, configfile):
         # Save the current parameters (for use with SAVE_CONFIG)
-        configfile.set('printer', 'delta_radius', "%.6f" % (self.radius,))
+        #configfile.set('printer', 'delta_radius', "%.6f" % (self.radius,))#flsun delete,don't calibrate raduis
         for i, axis in enumerate('abc'):
-            configfile.set('stepper_'+axis, 'angle', "%.6f" % (self.angles[i],))
+                #configfile.set('stepper_'+axis, 'angle', "%.6f" % (self.angles[i],))#flsun delete,don't calibrate angle
             configfile.set('stepper_'+axis, 'arm_length',
                            "%.6f" % (self.arms[i],))
             configfile.set('stepper_'+axis, 'position_endstop',
                            "%.6f" % (self.endstops[i],))
         gcode = configfile.get_printer().lookup_object("gcode")
-        gcode.respond_info(
-            "stepper_a: position_endstop: %.6f angle: %.6f arm_length: %.6f\n"
-            "stepper_b: position_endstop: %.6f angle: %.6f arm_length: %.6f\n"
-            "stepper_c: position_endstop: %.6f angle: %.6f arm_length: %.6f\n"
-            "delta_radius: %.6f"
-            % (self.endstops[0], self.angles[0], self.arms[0],
-               self.endstops[1], self.angles[1], self.arms[1],
-               self.endstops[2], self.angles[2], self.arms[2],
-               self.radius))
+        #flsun delete ,delete the next para ,don't show this info while leveling on web page
+        #gcode.respond_info(
+        #    "stepper_a: position_endstop: %.6f angle: %.6f arm_length: %.6f\n"
+        #    "stepper_b: position_endstop: %.6f angle: %.6f arm_length: %.6f\n"
+        #    "stepper_c: position_endstop: %.6f angle: %.6f arm_length: %.6f\n"
+        #    "delta_radius: %.6f"
+        #    % (self.endstops[0], self.angles[0], self.arms[0],
+        #       self.endstops[1], self.angles[1], self.arms[1],
+        #       self.endstops[2], self.angles[2], self.arms[2],
+        #       self.radius))
 
 def load_kinematics(toolhead, config):
     return DeltaKinematics(toolhead, config)
