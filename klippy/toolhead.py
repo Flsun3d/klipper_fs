@@ -269,6 +269,7 @@ class ToolHead:
                                self.cmd_SET_VELOCITY_LIMIT,
                                desc=self.cmd_SET_VELOCITY_LIMIT_help)
         gcode.register_command('M204', self.cmd_M204)
+        gcode.register_command('M205', self.cmd_M205)#flsun add ,add M205 X to modify jerk
         # Load some default modules
         modules = ["gcode_move", "homing", "idle_timeout", "statistics",
                    "manual_probe", "tuning_tower"]
@@ -593,6 +594,9 @@ class ToolHead:
                 return
             accel = min(p, t)
         self.max_accel = accel
+        self._calc_junction_deviation()
+    def cmd_M205(self, gcmd): #flsun add ,add M205 X to modify jerk
+        self.square_corner_velocity = gcmd.get_float('X', None, above=0.)
         self._calc_junction_deviation()
 
 def add_printer_objects(config):
