@@ -4,7 +4,9 @@
 #
 # This file may be distributed under the terms of the GNU GPLv3 license.
 import os, logging
-
+import sys #flsun add
+reload(sys) #flsun add
+sys.setdefaultencoding('utf8') #flsun add ,add the three line to support Chinese
 VALID_GCODE_EXTS = ['gcode', 'g', 'gco']
 
 class VirtualSD:
